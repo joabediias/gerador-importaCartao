@@ -73,6 +73,12 @@ TIPO_RETENCAO_MAP = {
     "PAGSEGURO UOL": "P",
 }
 
+TIPO_RECEBIMENTO_OPTIONS = [
+    "POS", "POS",
+    "TEF", "TEF",
+    "AMBOS", "AMBOS",
+]
+
 FORMA_CALC_DIF_CARTAO_PARC = {
     "Arredondar": "A",
     "Truncar": "T",
