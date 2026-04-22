@@ -72,3 +72,33 @@ TIPO_RETENCAO_MAP = {
     "PAG SEGURO": "P",
     "PAGSEGURO UOL": "P",
 }
+
+FORMA_CALC_DIF_CARTAO_PARC = {
+    "Arredondar": "A",
+    "Truncar": "T",
+}
+
+TIPO_VENCIMENTO_PARCELAS = {
+    "Utiliza dias informados pelo usuário": "U",
+    "Utiliza dia fixo": "F",
+}
+
+TIPO_COBRANCA_RETENCAO = {
+    "Parcela a parcela": "P",
+    "Apenas na primeira parcela": "A",
+}
+
+TIPO_PARCELAMENTO = {
+    "Pelo lojista": "L",
+    "Pela operadora": "O",
+}
+
+TIPO_INICIO_PERIODO_VENCIMENTO = {
+    "Data da venda": "V",
+    "Dia do mes": "D",
+}
+
+TIPO_VENCIMENTO_PRIMEIRA_PARC = {
+    "Proximo mes": "M",
+    "Qtd. de dias": "D",
+}
