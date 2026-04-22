@@ -31,7 +31,7 @@ def build_stylesheet() -> str:
         color: #14314d;
         background: #f4f7fb;
     }
-    QMainWindow, QFrame#page {
+    QMainWindow, QWidget#page {
         background: #f4f7fb;
     }
     QFrame#headerCard {
@@ -54,8 +54,8 @@ def build_stylesheet() -> str:
         font-weight: 700;
         border: 1px solid #d8e4f2;
         border-radius: 14px;
-        margin-top: 10px;
-        padding: 16px;
+        margin-top: 12px;
+        padding: 18px 16px 16px 16px;
         background: #ffffff;
     }
     QGroupBox::title {
@@ -70,6 +70,7 @@ def build_stylesheet() -> str:
         border: 1px solid #c8d8ea;
         border-radius: 8px;
         padding: 6px 8px;
+        min-height: 28px;
     }
     QComboBox QAbstractItemView {
         background: #ffffff;
@@ -96,4 +97,48 @@ def build_stylesheet() -> str:
     QLabel#mutedText { color: #5e7690; }
     QLabel#metricValue { font-size: 28px; font-weight: 700; color: #0d4b87; }
     QLabel#metricLabel { color: #5d7590; }
+    QScrollArea {
+    background: transparent;
+    border: none;
+    }
+    QScrollArea > QWidget > QWidget {
+        background: transparent;
+    }
+
+    QScrollBar:vertical {
+        background: #edf4fb;
+        width: 12px;
+        margin: 0;
+        border-radius: 6px;
+    }
+
+    QScrollBar::handle:vertical {
+        background: #c2d7ee;
+        min-height: 30px;
+        border-radius: 6px;
+    }
+
+    QScrollBar::handle:vertical:hover {
+        background: #aac8e7;
+    }
+
+    QScrollBar::add-line:vertical,
+    QScrollBar::sub-line:vertical {
+        height: 0;
+    }
+
+    QScrollBar::add-page:vertical,
+    QScrollBar::sub-page:vertical {
+        background: transparent;
+    }
+    QCheckBox {
+    color: #14314d;
+    spacing: 8px;
+    background: transparent;
+    }
+
+    QCheckBox::indicator {
+        width: 16px;
+        height: 16px;
+    }
     """

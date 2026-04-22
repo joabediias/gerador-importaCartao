@@ -29,13 +29,15 @@ class ParametersWidget(QGroupBox):
         super().__init__("3. Parâmetros da importação")
 
         root = QVBoxLayout(self)
-        root.setSpacing(14)
+        root.setSpacing(16)
+        root.setContentsMargins(14, 18, 14, 14)
 
         # ===== Seção geral =====
         box_geral = QGroupBox("Geral")
         grid_geral = QGridLayout(box_geral)
         grid_geral.setHorizontalSpacing(14)
         grid_geral.setVerticalSpacing(10)
+        grid_geral.setContentsMargins(14, 20, 14, 14)
 
         self.cmb_tipo_recebimento = self._combo_from_options(TIPO_RECEBIMENTO_OPTIONS, "POS")
         self.spn_credenciadora_id = QSpinBox()
@@ -81,6 +83,7 @@ class ParametersWidget(QGroupBox):
         grid_parc = QGridLayout(box_parc)
         grid_parc.setHorizontalSpacing(14)
         grid_parc.setVerticalSpacing(10)
+        grid_parc.setContentsMargins(14, 20, 14, 14)
 
         self.cmb_forma_calc = self._combo_from_options(FORMA_CALC_DIF_CARTAO_PARC_OPTIONS, "A")
         self.cmb_tipo_parcelamento = self._combo_from_options(TIPO_PARCELAMENTO_OPTIONS, "L")
@@ -102,6 +105,7 @@ class ParametersWidget(QGroupBox):
         grid_venc = QGridLayout(box_venc)
         grid_venc.setHorizontalSpacing(14)
         grid_venc.setVerticalSpacing(10)
+        grid_venc.setContentsMargins(14, 20, 14, 14)
 
         self.cmb_tipo_venc_parcelas = self._combo_from_options(TIPO_VENCIMENTO_PARCELAS_OPTIONS, "U")
 
@@ -115,12 +119,16 @@ class ParametersWidget(QGroupBox):
         grid_inicio = QGridLayout(box_inicio)
         grid_inicio.setHorizontalSpacing(14)
         grid_inicio.setVerticalSpacing(10)
+        grid_inicio.setContentsMargins(14, 20, 14, 14)
 
         self.cmb_tipo_inicio_periodo = self._combo_from_options(TIPO_INICIO_PERIODO_VENCIMENTO_OPTIONS, "V")
 
         self.spn_dia_inicio_periodo = QSpinBox()
         self.spn_dia_inicio_periodo.setRange(0, 31)
         self.spn_dia_inicio_periodo.setValue(0)
+        self.spn_dia_inicio_periodo.setMinimumHeight(28)
+        
+        
 
         grid_inicio.addWidget(QLabel("Tipo Data inicial do periodo de vencimento"), 0, 0)
         grid_inicio.addWidget(self.cmb_tipo_inicio_periodo, 0, 1)
@@ -134,12 +142,14 @@ class ParametersWidget(QGroupBox):
         grid_primeira = QGridLayout(box_primeira)
         grid_primeira.setHorizontalSpacing(14)
         grid_primeira.setVerticalSpacing(10)
+        grid_primeira.setContentsMargins(14, 20, 14, 14)
 
         self.cmb_tipo_venc_primeira = self._combo_from_options(TIPO_VENCIMENTO_PRIMEIRA_PARC_OPTIONS, "M")
 
         self.spn_dias_primeira = QSpinBox()
         self.spn_dias_primeira.setRange(0, 365)
         self.spn_dias_primeira.setValue(0)
+        self.spn_dias_primeira.setMinimumHeight(28)
 
         grid_primeira.addWidget(QLabel("Tipo vencimento primeira parcela"), 0, 0)
         grid_primeira.addWidget(self.cmb_tipo_venc_primeira, 0, 1)
@@ -157,6 +167,26 @@ class ParametersWidget(QGroupBox):
         self._on_tipo_vencimento_parcelas_changed()
         self._on_tipo_inicio_changed()
         self._on_tipo_primeira_changed()
+
+        #self.setMinimumHeight(0)
+        for combo in [
+            self.cmb_tipo_recebimento,
+            self.cmb_forma_calc,
+            self.cmb_tipo_parcelamento,
+            self.cmb_tipo_cobranca,
+            self.cmb_tipo_venc_parcelas,
+            self.cmb_tipo_inicio_periodo,
+            self.cmb_tipo_venc_primeira,
+        ]:
+            combo.setMinimumHeight(32)
+
+        for spin in [
+            self.spn_credenciadora_id,
+            self.spn_dia_inicio_periodo,
+            self.spn_dias_primeira,
+        ]:
+            spin.setMinimumHeight(32)
+        
 
     @staticmethod
     def _combo_from_options(options: list[tuple[str, str]], current_value: str) -> QComboBox:

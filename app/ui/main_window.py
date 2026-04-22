@@ -11,12 +11,13 @@ from PySide6.QtWidgets import (
     QMenuBar,
     QMessageBox,
     QStatusBar,
+    QScrollArea,
     QVBoxLayout,
     QWidget,
 )
 
 from app.domain.constants import APP_NAME, BASE_DIR, LOGO_PATH, TEMPLATE_PATH
-from app.domain.validators import ValidationError
+from app.domain.validators import ValidationError, validate_app_params
 from app.services.export_service import ExportService
 from app.services.template_service import TemplateService
 from app.ui.styles import build_stylesheet
@@ -61,27 +62,41 @@ class MainWindow(QMainWindow):
         content.setSpacing(16)
         root.addLayout(content, 1)
 
-        left_panel = QVBoxLayout()
-        left_panel.setSpacing(12)
-        content.addLayout(left_panel, 0)
-
-        right_panel = QVBoxLayout()
-        right_panel.setSpacing(12)
-        content.addLayout(right_panel, 1)
+        # ===== Coluna esquerda =====
+        left_container = QWidget()
+        left_layout = QVBoxLayout(left_container)
+        left_layout.setContentsMargins(0, 0, 0, 0)
+        left_layout.setSpacing(12)
 
         self.model_box = ModelBoxWidget()
         self.upload_box = UploadBoxWidget()
         self.params_widget = ParametersWidget()
+
+        left_layout.addWidget(self.model_box)
+        left_layout.addWidget(self.upload_box)
+        left_layout.addWidget(self.params_widget)
+        left_layout.addStretch(1)
+
+        self.left_scroll = QScrollArea()
+        self.left_scroll.setWidgetResizable(True)
+        self.left_scroll.setFrameShape(QScrollArea.NoFrame)
+        self.left_scroll.setWidget(left_container)
+
+        # ===== Coluna direita =====
+        right_container = QWidget()
+        right_layout = QVBoxLayout(right_container)
+        right_layout.setContentsMargins(0, 0, 0, 0)
+        right_layout.setSpacing(12)
+
         self.summary_widget = SummaryWidget()
         self.outputs_widget = OutputTabsWidget()
 
-        left_panel.addWidget(self.model_box)
-        left_panel.addWidget(self.upload_box)
-        left_panel.addWidget(self.params_widget)
-        left_panel.addStretch(1)
+        right_layout.addWidget(self.summary_widget)
+        right_layout.addWidget(self.outputs_widget, 1)
 
-        right_panel.addWidget(self.summary_widget)
-        right_panel.addWidget(self.outputs_widget, 1)
+        # Proporção das colunas
+        content.addWidget(self.left_scroll, 5)
+        content.addWidget(right_container, 4)
 
         self.setMenuBar(self._build_menu())
         self.setStatusBar(QStatusBar())
@@ -165,6 +180,7 @@ class MainWindow(QMainWindow):
             return
         params = self.params_widget.get_params()
         try:
+            validate_app_params(params)
             result = generate_import_files(self.selected_file, params)
         except ValidationError as exc:
             QMessageBox.critical(self, APP_NAME, str(exc))

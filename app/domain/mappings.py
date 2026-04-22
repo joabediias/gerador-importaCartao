@@ -74,37 +74,37 @@ TIPO_RETENCAO_MAP = {
 }
 
 TIPO_RECEBIMENTO_OPTIONS = [
-    "POS", "POS",
-    "TEF", "TEF",
-    "AMBOS", "AMBOS",
+    ("POS", "POS"),
+    ("TEF", "TEF"),
+    ("AMBOS", "AMBOS"),
 ]
 
-FORMA_CALC_DIF_CARTAO_PARC = {
-    "Arredondar": "A",
-    "Truncar": "T",
-}
+FORMA_CALC_DIF_CARTAO_PARC_OPTIONS = [
+    ("Arredondar", "A"),
+    ("Truncar", "T"),
+]
 
-TIPO_VENCIMENTO_PARCELAS = {
-    "Utiliza dias informados pelo usuário": "U",
-    "Utiliza dia fixo": "F",
-}
+TIPO_VENCIMENTO_PARCELAS_OPTIONS = [
+    ("Utiliza dias informados pelo usuário", "U"),
+    ("Utiliza dia fixo", "F"),
+]
 
-TIPO_COBRANCA_RETENCAO = {
-    "Parcela a parcela": "P",
-    "Apenas na primeira parcela": "A",
-}
+TIPO_COBRANCA_RETENCAO_OPTIONS = [
+    ("Parcela a parcela", "P"),
+    ("Apenas na primeira parcela", "A"),
+]
 
-TIPO_PARCELAMENTO = {
-    "Pelo lojista": "L",
-    "Pela operadora": "O",
-}
+TIPO_PARCELAMENTO_OPTIONS = [
+    ("Pelo lojista", "L"),
+    ("Pela operadora", "O"),
+]
 
-TIPO_INICIO_PERIODO_VENCIMENTO = {
-    "Data da venda": "V",
-    "Dia do mes": "D",
-}
+TIPO_INICIO_PERIODO_VENCIMENTO_OPTIONS = [
+    ("Data da venda", "V"),
+    ("Dia do mes", "D"),
+]
 
-TIPO_VENCIMENTO_PRIMEIRA_PARC = {
-    "Proximo mes": "M",
-    "Qtd. de dias": "D",
-}
+TIPO_VENCIMENTO_PRIMEIRA_PARC_OPTIONS = [
+    ("Proximo mes", "M"),
+    ("Qtd. de dias", "D"),
+]
