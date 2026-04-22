@@ -15,8 +15,8 @@ class AppParams:
     forma_calc_dif_cartao_parc: str
     perm_vincular_crt_aut_caixa: str
     tipo_vencimento_parcelas: str
-    dia_inicio_periodo_vencimento: str
-    dias_para_venc_primeira_parc: str
+    dia_inicio_periodo_vencimento: int
+    dias_para_venc_primeira_parc: int
     tipo_parcelamento: str
     tipo_cobranca_retencao: str
     vencimento_parc_prox_dia_util: str
