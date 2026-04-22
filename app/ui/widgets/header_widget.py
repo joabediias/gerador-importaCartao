@@ -38,7 +38,7 @@ class HeaderWidget(QFrame):
         layout.addLayout(texts, 1)
 
         right = QVBoxLayout()
-        status = QLabel("Versão 1.0.3")
+        status = QLabel("Versão 1.0.4")
         status.setObjectName("statusPill")
         right.addWidget(status)
         layout.addLayout(right)
