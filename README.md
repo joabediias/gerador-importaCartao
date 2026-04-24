@@ -30,7 +30,7 @@ pip install pyinstaller
 Gere a pasta do executável:
 
 ```bash
-python -m PyInstaller --noconfirm --clean --windowed --onedir --add-data "modelo_taxas_cartao_melhorado.xlsx;." desktop_app.py
+python -m PyInstaller --noconfirm --clean --windowed --onedir --add-data "templates/modelo_taxas_cartao.xlsx;templates" --add-data "assets;assets" desktop_app.py
 ```
 
 O executável será criado em:

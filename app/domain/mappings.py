@@ -108,3 +108,8 @@ TIPO_VENCIMENTO_PRIMEIRA_PARC_OPTIONS = [
     ("Proximo mes", "M"),
     ("Qtd. de dias", "D"),
 ]
+
+CREDENCIADORA_IDS = {
+  "REDE": 42,
+  "CIELO": 37
+}

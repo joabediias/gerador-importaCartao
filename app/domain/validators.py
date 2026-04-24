@@ -55,7 +55,8 @@ def validate_app_params(params) -> None:
 
     if params.tipo_inicio_periodo_vencimento == "D" and params.dia_inicio_periodo_vencimento <= 0:
         raise ValidationError(
-            "Se o tipo da data inicial do período de vencimento for 'Dia do mes', informe um valor maior que 0."
+            "Data inicial do período de vencimento: quando o tipo for 'Dia do mês', "
+            "informe um valor maior que 0."
         )
 
     if params.tipo_vencimento_primeira_parc == "M" and params.dias_para_venc_primeira_parc != 0:
@@ -65,5 +66,17 @@ def validate_app_params(params) -> None:
 
     if params.tipo_vencimento_primeira_parc == "D" and params.dias_para_venc_primeira_parc <= 0:
         raise ValidationError(
-            "Se o tipo de vencimento da primeira parcela for 'Qtd. de dias', informe um valor maior que 0."
+            "Vencimento da primeira parcela: quando o tipo for 'Qtd. de dias', "
+            "informe um valor maior que 0."
         )
+    
+    if not params.credenciadora_ids:
+        raise ValidationError(
+            "Informe o código das credenciadoras encontradas na planilha."
+        )
+    
+    for credenciadora, credenciadora_id in params.credenciadora_ids.items():
+        if credenciadora_id <= 0:
+            raise ValidationError(
+                f"Informe um código válido para a credenciadora '{credenciadora}'."
+            )

@@ -1,16 +1,7 @@
 from __future__ import annotations
 
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import (
-    QCheckBox, 
-    QComboBox, 
-    QGridLayout, 
-    QGroupBox, 
-    QHBoxLayout,
-    QLabel, 
-    QSpinBox,
-    QVBoxLayout,
-    QWidget,)
+from PySide6.QtWidgets import QGridLayout, QGroupBox, QVBoxLayout, QSizePolicy, QSpinBox
+from app.utils.parsing import normalize_text
 
 from app.domain.mappings import (
     FORMA_CALC_DIF_CARTAO_PARC_OPTIONS,
@@ -22,153 +13,233 @@ from app.domain.mappings import (
     TIPO_VENCIMENTO_PRIMEIRA_PARC_OPTIONS,
 )
 from app.domain.models import AppParams
+from app.ui.widgets.form_fields import (
+    add_labeled_widget,
+    create_checkbox,
+    create_combo_from_options,
+    create_spinbox,
+)
+from app.ui.widgets.section_header import SectionHeader
 
 
 class ParametersWidget(QGroupBox):
+    """
+    Painel com os parâmetros complementares da importação.
+
+    A planilha traz os dados variáveis; este painel reúne as escolhas
+    operacionais feitas pelo usuário antes da geração dos arquivos.
+    """
+
     def __init__(self) -> None:
-        super().__init__("3. Parâmetros da importação")
+        super().__init__()
 
-        root = QVBoxLayout(self)
-        root.setSpacing(16)
-        root.setContentsMargins(14, 18, 14, 14)
+        self.root = QVBoxLayout(self)
+        self.root.setSpacing(16)
+        self.root.setContentsMargins(14, 18, 14, 14)
+        self.root.addWidget(
+            SectionHeader("Parâmetros da importação")
+        )
 
-        # ===== Seção geral =====
-        box_geral = QGroupBox("Geral")
-        grid_geral = QGridLayout(box_geral)
-        grid_geral.setHorizontalSpacing(14)
-        grid_geral.setVerticalSpacing(10)
-        grid_geral.setContentsMargins(14, 20, 14, 14)
+        self.credenciadora_inputs: dict[str, QSpinBox] = {}
 
-        self.cmb_tipo_recebimento = self._combo_from_options(TIPO_RECEBIMENTO_OPTIONS, "POS")
-        self.spn_credenciadora_id = QSpinBox()
-        self.spn_credenciadora_id.setRange(1, 999999)
-        self.spn_credenciadora_id.setValue(42)
+        self._build_general_section()
+        self._build_credenciadoras_section()
+        self._build_financial_rules_section()
+        self._build_due_type_section()
+        self._build_period_start_section()
+        self._build_first_due_section()
 
-        self.chk_liberada = QCheckBox("Venda liberada para consumidor final")
-        self.chk_liberada.setChecked(True)
+        self._connect_signals()
+        self._apply_initial_state()
+        self._apply_control_sizes()
 
-        self.chk_vendas_web = QCheckBox("Utilizar em vendas web")
-        self.chk_vendas_web.setChecked(True)
+    # ========================================================
+    # Seções principais
+    # ========================================================
+    def _build_general_section(self) -> None:
+        self.box_geral = self._create_section_box("Geral")
+        grid = self._create_grid()
 
-        self.chk_perm_vincular = QCheckBox("Permitir que este cartão seja vinculado automaticamente")
-        self.chk_perm_vincular.setChecked(True)
+        self.cmb_tipo_recebimento = create_combo_from_options(
+            TIPO_RECEBIMENTO_OPTIONS, "POS"
+        )
 
-        self.chk_venc_prox_util = QCheckBox("Vencimento da parcela sempre no próximo dia útil")
-        self.chk_venc_prox_util.setChecked(True)
+        self.chk_liberada = create_checkbox(
+            "Venda liberada para consumidor final", True
+        )
+        self.chk_vendas_web = create_checkbox("Utilizar em vendas web", True)
+        self.chk_perm_vincular = create_checkbox(
+            "Permitir que este cartão seja vinculado automaticamente", True
+        )
+        self.chk_venc_prox_util = create_checkbox(
+            "Vencimento da parcela sempre no próximo dia útil", True
+        )
+        self.chk_apenas_uteis = create_checkbox(
+            "Considerar apenas dias uteis no calculo do prazo", False
+        )
+        self.chk_receb_unico = create_checkbox(
+            "Recebimento unico (Pagseguro / Rede)", False
+        )
 
-        self.chk_apenas_uteis = QCheckBox("Considerar apenas dias uteis no calculo do prazo")
-        self.chk_apenas_uteis.setChecked(False)
+        add_labeled_widget(grid, 0, 0, "Tipo de recebimento", self.cmb_tipo_recebimento)
 
-        self.chk_receb_unico = QCheckBox("Recebimento unico (Pagseguro / Rede)")
-        self.chk_receb_unico.setChecked(False)
+        grid.addWidget(self.chk_liberada, 1, 0, 1, 4)
+        grid.addWidget(self.chk_vendas_web, 2, 0, 1, 4)
+        grid.addWidget(self.chk_perm_vincular, 3, 0, 1, 4)
+        grid.addWidget(self.chk_venc_prox_util, 4, 0, 1, 4)
+        grid.addWidget(self.chk_apenas_uteis, 5, 0, 1, 4)
+        grid.addWidget(self.chk_receb_unico, 6, 0, 1, 4)
 
-        grid_geral.addWidget(QLabel("Tipo de recebimento"), 0, 0)
-        grid_geral.addWidget(self.cmb_tipo_recebimento, 0, 1)
-        grid_geral.addWidget(QLabel("Credenciadora ID"), 0, 2)
-        grid_geral.addWidget(self.spn_credenciadora_id, 0, 3)
+        self.box_geral.layout().addLayout(grid)
+        self.root.addWidget(self.box_geral)
 
-        grid_geral.addWidget(self.chk_liberada, 1, 0, 1, 2)
-        grid_geral.addWidget(self.chk_vendas_web, 1, 2, 1, 2)
+    def _build_financial_rules_section(self) -> None:
+        self.box_regras = self._create_section_box("Parcelamento e retenção")
+        grid = self._create_grid()
 
-        grid_geral.addWidget(self.chk_perm_vincular, 2, 0, 1, 2)
-        grid_geral.addWidget(self.chk_venc_prox_util, 2, 2, 1, 2)
+        self.cmb_forma_calc = create_combo_from_options(
+            FORMA_CALC_DIF_CARTAO_PARC_OPTIONS, "A"
+        )
+        self.cmb_tipo_parcelamento = create_combo_from_options(
+            TIPO_PARCELAMENTO_OPTIONS, "L"
+        )
+        self.cmb_tipo_cobranca = create_combo_from_options(
+            TIPO_COBRANCA_RETENCAO_OPTIONS, "P"
+        )
 
-        grid_geral.addWidget(self.chk_apenas_uteis, 3, 0, 1, 2)
-        grid_geral.addWidget(self.chk_receb_unico, 3, 2, 1, 2)
+        add_labeled_widget(
+            grid,
+            0,
+            0,
+            "Forma de cálculo",
+            self.cmb_forma_calc,
+        )
+        add_labeled_widget(
+            grid,
+            1,
+            0,
+            "Tipo do parcelamento",
+            self.cmb_tipo_parcelamento,
+        )
+        add_labeled_widget(
+            grid,
+            2,
+            0,
+            "Tipo de cobrança da retenção",
+            self.cmb_tipo_cobranca,
+        )
 
-        root.addWidget(box_geral)
+        self.box_regras.layout().addLayout(grid)
+        self.root.addWidget(self.box_regras)
 
-        # ===== Seção parcelamento e retenção =====
-        box_parc = QGroupBox("Parcelamento e retenção")
-        grid_parc = QGridLayout(box_parc)
-        grid_parc.setHorizontalSpacing(14)
-        grid_parc.setVerticalSpacing(10)
-        grid_parc.setContentsMargins(14, 20, 14, 14)
+    def _build_due_type_section(self) -> None:
+        self.box_venc = self._create_section_box("Vencimento das parcelas")
+        grid = self._create_grid()
 
-        self.cmb_forma_calc = self._combo_from_options(FORMA_CALC_DIF_CARTAO_PARC_OPTIONS, "A")
-        self.cmb_tipo_parcelamento = self._combo_from_options(TIPO_PARCELAMENTO_OPTIONS, "L")
-        self.cmb_tipo_cobranca = self._combo_from_options(TIPO_COBRANCA_RETENCAO_OPTIONS, "P")
+        self.cmb_tipo_venc_parcelas = create_combo_from_options(
+            TIPO_VENCIMENTO_PARCELAS_OPTIONS, "U"
+        )
 
-        grid_parc.addWidget(QLabel("Forma de cálculo (cartão parcelado)"), 0, 0)
-        grid_parc.addWidget(self.cmb_forma_calc, 0, 1)
+        add_labeled_widget(
+            grid,
+            0,
+            0,
+            "Tipo de vencimento das parcelas",
+            self.cmb_tipo_venc_parcelas,
+        )
 
-        grid_parc.addWidget(QLabel("Tipo do parcelamento"), 0, 2)
-        grid_parc.addWidget(self.cmb_tipo_parcelamento, 0, 3)
+        self.box_venc.layout().addLayout(grid)
+        self.root.addWidget(self.box_venc)
 
-        grid_parc.addWidget(QLabel("Tipo de cobrança da retenção"), 1, 0)
-        grid_parc.addWidget(self.cmb_tipo_cobranca, 1, 1)
+    def _build_period_start_section(self) -> None:
+        self.box_inicio = self._create_section_box("Data inicial do periodo de vencimento")
+        grid = self._create_grid()
 
-        root.addWidget(box_parc)
+        self.cmb_tipo_inicio_periodo = create_combo_from_options(
+            TIPO_INICIO_PERIODO_VENCIMENTO_OPTIONS, "V"
+        )
+        self.spn_dia_inicio_periodo = create_spinbox(0, 31, 0)
 
-        # ===== Seção vencimento =====
-        box_venc = QGroupBox("Vencimento das parcelas")
-        grid_venc = QGridLayout(box_venc)
-        grid_venc.setHorizontalSpacing(14)
-        grid_venc.setVerticalSpacing(10)
-        grid_venc.setContentsMargins(14, 20, 14, 14)
+        add_labeled_widget(
+            grid,
+            0,
+            0,
+            "Tipo",
+            self.cmb_tipo_inicio_periodo,
+        )
+        add_labeled_widget(
+            grid,
+            0,
+            2,
+            "Dia do mês",
+            self.spn_dia_inicio_periodo,
+        )
 
-        self.cmb_tipo_venc_parcelas = self._combo_from_options(TIPO_VENCIMENTO_PARCELAS_OPTIONS, "U")
+        self.box_inicio.layout().addLayout(grid)
+        self.root.addWidget(self.box_inicio)
 
-        grid_venc.addWidget(QLabel("Tipo de vencimento das parcelas"), 0, 0)
-        grid_venc.addWidget(self.cmb_tipo_venc_parcelas, 0, 1)
+    def _build_first_due_section(self) -> None:
+        self.box_primeira = self._create_section_box("Vencimento da primeira parcela")
+        grid = self._create_grid()
 
-        root.addWidget(box_venc)
+        self.cmb_tipo_venc_primeira = create_combo_from_options(
+            TIPO_VENCIMENTO_PRIMEIRA_PARC_OPTIONS, "M"
+        )
+        self.spn_dias_primeira = create_spinbox(0, 365, 0)
 
-        # ===== Seção data inicial =====
-        box_inicio = QGroupBox("Data inicial do periodo de vencimento")
-        grid_inicio = QGridLayout(box_inicio)
-        grid_inicio.setHorizontalSpacing(14)
-        grid_inicio.setVerticalSpacing(10)
-        grid_inicio.setContentsMargins(14, 20, 14, 14)
+        add_labeled_widget(
+            grid,
+            0,
+            0,
+            "Tipo",
+            self.cmb_tipo_venc_primeira,
+        )
+        add_labeled_widget(
+            grid,
+            0,
+            2,
+            "Qtd. de dias",
+            self.spn_dias_primeira,
+        )
 
-        self.cmb_tipo_inicio_periodo = self._combo_from_options(TIPO_INICIO_PERIODO_VENCIMENTO_OPTIONS, "V")
+        self.box_primeira.layout().addLayout(grid)
+        self.root.addWidget(self.box_primeira)
 
-        self.spn_dia_inicio_periodo = QSpinBox()
-        self.spn_dia_inicio_periodo.setRange(0, 31)
-        self.spn_dia_inicio_periodo.setValue(0)
-        self.spn_dia_inicio_periodo.setMinimumHeight(28)
-        
-        
+    def _build_credenciadoras_section(self) -> None:
+        self.box_credenciadoras = self._create_section_box("Credenciadoras")
+        self.credenciadoras_grid = self._create_grid()
 
-        grid_inicio.addWidget(QLabel("Tipo Data inicial do periodo de vencimento"), 0, 0)
-        grid_inicio.addWidget(self.cmb_tipo_inicio_periodo, 0, 1)
-        grid_inicio.addWidget(QLabel("Data inicial do periodo de vencimento"), 0, 2)
-        grid_inicio.addWidget(self.spn_dia_inicio_periodo, 0, 3)
+        self.box_credenciadoras.layout().addLayout(self.credenciadoras_grid)
+        self.root.addWidget(self.box_credenciadoras)
 
-        root.addWidget(box_inicio)
+        self.box_credenciadoras.setVisible(False)
+    
+    # ========================================================
+    # Helpers visuais / construção
+    # ========================================================
+    def _create_section_box(self, title: str) -> QGroupBox:
+        box = QGroupBox()
+        layout = QVBoxLayout(box)
+        layout.setSpacing(10)
+        layout.setContentsMargins(12, 12, 12, 12)
+        layout.addWidget(SectionHeader(title))
+        return box
 
-        # ===== Seção primeira parcela =====
-        box_primeira = QGroupBox("Vencimento da primeira parcela")
-        grid_primeira = QGridLayout(box_primeira)
-        grid_primeira.setHorizontalSpacing(14)
-        grid_primeira.setVerticalSpacing(10)
-        grid_primeira.setContentsMargins(14, 20, 14, 14)
+    @staticmethod
+    def _create_grid() -> QGridLayout:
+        grid = QGridLayout()
+        grid.setHorizontalSpacing(12)
+        grid.setVerticalSpacing(10)
+        grid.setContentsMargins(10, 10, 10, 10)
 
-        self.cmb_tipo_venc_primeira = self._combo_from_options(TIPO_VENCIMENTO_PRIMEIRA_PARC_OPTIONS, "M")
+        grid.setColumnStretch(0, 0)
+        grid.setColumnStretch(1, 1)
+        grid.setColumnStretch(2, 0)
+        grid.setColumnStretch(3, 1)
 
-        self.spn_dias_primeira = QSpinBox()
-        self.spn_dias_primeira.setRange(0, 365)
-        self.spn_dias_primeira.setValue(0)
-        self.spn_dias_primeira.setMinimumHeight(28)
+        return grid
 
-        grid_primeira.addWidget(QLabel("Tipo vencimento primeira parcela"), 0, 0)
-        grid_primeira.addWidget(self.cmb_tipo_venc_primeira, 0, 1)
-        grid_primeira.addWidget(QLabel("Dia p/ venc. primeira parcela"), 0, 2)
-        grid_primeira.addWidget(self.spn_dias_primeira, 0, 3)
-
-        root.addWidget(box_primeira)
-
-        # sinais
-        self.cmb_tipo_venc_parcelas.currentIndexChanged.connect(self._on_tipo_vencimento_parcelas_changed)
-        self.cmb_tipo_inicio_periodo.currentIndexChanged.connect(self._on_tipo_inicio_changed)
-        self.cmb_tipo_venc_primeira.currentIndexChanged.connect(self._on_tipo_primeira_changed)
-
-        # aplica estado inicial
-        self._on_tipo_vencimento_parcelas_changed()
-        self._on_tipo_inicio_changed()
-        self._on_tipo_primeira_changed()
-
-        #self.setMinimumHeight(0)
+    def _apply_control_sizes(self) -> None:
         for combo in [
             self.cmb_tipo_recebimento,
             self.cmb_forma_calc,
@@ -178,55 +249,106 @@ class ParametersWidget(QGroupBox):
             self.cmb_tipo_inicio_periodo,
             self.cmb_tipo_venc_primeira,
         ]:
-            combo.setMinimumHeight(32)
+            combo.setMinimumHeight(36)
+            combo.setMinimumWidth(0)
+            combo.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         for spin in [
-            self.spn_credenciadora_id,
             self.spn_dia_inicio_periodo,
             self.spn_dias_primeira,
         ]:
-            spin.setMinimumHeight(32)
-        
+            spin.setMinimumHeight(36)
+            spin.setMinimumWidth(0)
+            spin.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
+    # ========================================================
+    # Helpers de leitura dos valores
+    # ========================================================
     @staticmethod
-    def _combo_from_options(options: list[tuple[str, str]], current_value: str) -> QComboBox:
-        combo = QComboBox()
-        for label, value in options:
-            combo.addItem(label, value)
-
-        index = combo.findData(current_value)
-        if index >= 0:
-            combo.setCurrentIndex(index)
-        return combo
-
-    @staticmethod
-    def _checkbox_value(checkbox: QCheckBox) -> str:
+    def _checkbox_value(checkbox) -> str:
         return "S" if checkbox.isChecked() else "N"
 
     @staticmethod
-    def _combo_value(combo: QComboBox) -> str:
+    def _combo_value(combo) -> str:
         return str(combo.currentData())
 
-    def _set_combo_by_value(self, combo: QComboBox, value: str) -> None:
+    def _set_combo_by_value(self, combo, value: str) -> None:
         index = combo.findData(value)
         if index >= 0:
             combo.setCurrentIndex(index)
 
+    def set_credenciadoras(self, credenciadoras: list[str]) -> None:
+        self.credenciadora_inputs.clear()
+
+        while self.credenciadoras_grid.count():
+            item = self.credenciadoras_grid.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                widget.deleteLater()
+
+        credenciadoras_normalizadas = sorted({
+            normalize_text(cred)
+            for cred in credenciadoras
+            if normalize_text(cred)
+        })
+
+        if not credenciadoras_normalizadas:
+            self.box_credenciadoras.setVisible(False)
+            return
+
+        for row, credenciadora in enumerate(credenciadoras_normalizadas):
+            spin = create_spinbox(1, 999999, 1)
+            spin.setMinimumHeight(36)
+            spin.setMinimumWidth(0)
+            spin.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
+            self.credenciadora_inputs[credenciadora] = spin
+            add_labeled_widget(
+                self.credenciadoras_grid,
+                row,
+                0,
+                f"{credenciadora} ID",
+                spin,
+            )
+
+        self.box_credenciadoras.setVisible(True)
+
+    # ========================================================
+    # Regras de comportamento entre campos
+    # ========================================================
+    def _connect_signals(self) -> None:
+        self.cmb_tipo_venc_parcelas.currentIndexChanged.connect(
+            self._on_tipo_vencimento_parcelas_changed
+        )
+        self.cmb_tipo_inicio_periodo.currentIndexChanged.connect(
+            self._on_tipo_inicio_changed
+        )
+        self.cmb_tipo_venc_primeira.currentIndexChanged.connect(
+            self._on_tipo_primeira_changed
+        )
+
+    def _apply_initial_state(self) -> None:
+        self._on_tipo_vencimento_parcelas_changed()
+        self._on_tipo_inicio_changed()
+        self._on_tipo_primeira_changed()
+
     def _on_tipo_vencimento_parcelas_changed(self) -> None:
         codigo = self._combo_value(self.cmb_tipo_venc_parcelas)
-        bloquear = codigo == "U"
+        ocultar_blocos = codigo == "U"
 
-        if bloquear:
+        if ocultar_blocos:
             self._set_combo_by_value(self.cmb_tipo_inicio_periodo, "V")
             self.spn_dia_inicio_periodo.setValue(0)
-
             self._set_combo_by_value(self.cmb_tipo_venc_primeira, "M")
             self.spn_dias_primeira.setValue(0)
 
-        self.cmb_tipo_inicio_periodo.setEnabled(not bloquear)
-        self.spn_dia_inicio_periodo.setEnabled(not bloquear)
-        self.cmb_tipo_venc_primeira.setEnabled(not bloquear)
-        self.spn_dias_primeira.setEnabled(not bloquear)
+        self.box_inicio.setVisible(not ocultar_blocos)
+        self.box_primeira.setVisible(not ocultar_blocos)
+
+        self.cmb_tipo_inicio_periodo.setEnabled(not ocultar_blocos)
+        self.spn_dia_inicio_periodo.setEnabled(not ocultar_blocos)
+        self.cmb_tipo_venc_primeira.setEnabled(not ocultar_blocos)
+        self.spn_dias_primeira.setEnabled(not ocultar_blocos)
 
     def _on_tipo_inicio_changed(self) -> None:
         if not self.cmb_tipo_inicio_periodo.isEnabled():
@@ -236,10 +358,10 @@ class ParametersWidget(QGroupBox):
         if codigo == "V":
             self.spn_dia_inicio_periodo.setValue(0)
             self.spn_dia_inicio_periodo.setEnabled(False)
+            self.spn_dia_inicio_periodo.setValue(0)
+            self.spn_dia_inicio_periodo.setEnabled(False)
         else:
             self.spn_dia_inicio_periodo.setEnabled(True)
-            if self.spn_dia_inicio_periodo.value() == 0:
-                self.spn_dia_inicio_periodo.setValue(1)
 
     def _on_tipo_primeira_changed(self) -> None:
         if not self.cmb_tipo_venc_primeira.isEnabled():
@@ -251,14 +373,21 @@ class ParametersWidget(QGroupBox):
             self.spn_dias_primeira.setEnabled(False)
         else:
             self.spn_dias_primeira.setEnabled(True)
-            if self.spn_dias_primeira.value() == 0:
-                self.spn_dias_primeira.setValue(1)
 
+    def get_credenciadora_ids(self) -> dict[str, int]:
+        return {
+            credenciadora: spin.value()
+            for credenciadora, spin in self.credenciadora_inputs.items()
+        }
+    
+    # ========================================================
+    # Saída estruturada dos parâmetros
+    # ========================================================
     def get_params(self) -> AppParams:
         return AppParams(
             tipo_recebimento=self._combo_value(self.cmb_tipo_recebimento),
             liberada_cons_final_padrao=self._checkbox_value(self.chk_liberada),
-            credenciadora_id=self.spn_credenciadora_id.value(),
+            credenciadora_ids=self.get_credenciadora_ids(),
             utilizar_em_vendas_web=self._checkbox_value(self.chk_vendas_web),
             forma_calc_dif_cartao_parc=self._combo_value(self.cmb_forma_calc),
             perm_vincular_crt_aut_caixa=self._checkbox_value(self.chk_perm_vincular),

@@ -10,7 +10,7 @@ import pandas as pd
 class AppParams:
     tipo_recebimento: str
     liberada_cons_final_padrao: str
-    credenciadora_id: int
+    credenciadora_ids: dict[str, int]
     utilizar_em_vendas_web: str
     forma_calc_dif_cartao_parc: str
     perm_vincular_crt_aut_caixa: str
@@ -33,7 +33,6 @@ class OutputBundle:
 
     def counts(self) -> Dict[str, int]:
         return {name: len(df) for name, df in self.tables.items()}
-
 
 @dataclass(slots=True)
 class GenerationResult:

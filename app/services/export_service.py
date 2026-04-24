@@ -12,14 +12,18 @@ class ExportService:
     @staticmethod
     def build_zip(bundle: OutputBundle) -> bytes:
         memory = BytesIO()
+
         with zipfile.ZipFile(memory, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
             for filename, df in bundle.tables.items():
-                zf.writestr(filename, df.to_csv(index=False, sep=CSV_SEPARATOR, encoding=CSV_ENCODING))
+                csv_text = df.to_csv(index=False, sep=CSV_SEPARATOR)
+                csv_bytes = csv_text.encode(CSV_ENCODING)
+                zf.writestr(filename, csv_bytes)
         return memory.getvalue()
 
     @staticmethod
     def save_csvs(bundle: OutputBundle, destination_dir: Path) -> None:
         destination_dir.mkdir(parents=True, exist_ok=True)
+        
         for filename, df in bundle.tables.items():
             df.to_csv(destination_dir / filename, index=False, sep=CSV_SEPARATOR, encoding=CSV_ENCODING)
 
