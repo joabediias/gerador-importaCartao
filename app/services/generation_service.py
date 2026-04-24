@@ -116,7 +116,7 @@ class GenerationService:
     def build_portadores(entries: List[Dict[str, object]]) -> Tuple[pd.DataFrame, Dict[Tuple[str, str, str], int]]:
         seen: Dict[Tuple[str, str, str], int] = {}
         rows = []
-        next_id = 8000
+        next_id = 1000
         for entry in entries:
             key = (entry["credenciadora"], entry["bandeira"], entry["tipo"])
             if key in seen:
