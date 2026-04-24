@@ -50,5 +50,4 @@ dist\desktop_app\desktop_app.exe
 ## Estrutura
 
 - `desktop_app.py` -> interface desktop
-- `core.py` -> regras de negócio e geração dos CSVs
-- `modelo_taxas_cartao_melhorado.xlsx` -> modelo oficial para preenchimento
+- `modelo_taxas_cartao.xlsx` -> modelo oficial para preenchimento
