@@ -41,9 +41,9 @@ class GenerationService:
         return BANDEIRA_COD_MAP.get(bandeira, bandeira[:3])
 
     @staticmethod
-    def build_nome_cartao(cred: str, bandeira: str, tipo: str, parcelas: int) -> str:
+    def build_nome_cartao(cred: str, bandeira: str, tipo: str, parcelas: int, recebimento: str,) -> str:
         suffix = f" {parcelas:02d}X" if tipo == "PARCELADO" else ""
-        return f"{cred} - {bandeira} {tipo}{suffix}"
+        return f"{cred} - {bandeira} {tipo}{suffix} - {recebimento}"
 
     @staticmethod
     def recebimento_variants(tipo_recebimento: str) -> List[str]:
@@ -188,7 +188,7 @@ class GenerationService:
                 )
                 cartoes_rows.append({
                     "CHAVE_IMPORTACAO": chave,
-                    "NOME": cls.build_nome_cartao(entry["credenciadora"], entry["bandeira"], entry["tipo"], int(entry["parcelas"])),
+                    "NOME": cls.build_nome_cartao(str(entry["credenciadora"]), str(entry["bandeira"]), str(entry["tipo"]), int(entry["parcelas"]),recebimento,),
                     "NUMERO_CONTRATO": "X",
                     "REDE_CARTAO_TEF": cls.rede_cartao_tef(str(entry["credenciadora"])),
                     "BANDEIRA_CARTAO_TEF": cls.bandeira_tef(str(entry["bandeira"])),
