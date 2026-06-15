@@ -140,7 +140,7 @@ class GenerationService:
                 f"Informe o código da credenciadora '{cred_normalizada}' antes de gerar os arquivos."
             )
         
-        return int(credenciadora_cnpj)
+        return str(credenciadora_cnpj)
     
     @staticmethod
     def get_tipo_retencao_cartao(params: AppParams, credenciadora: str) -> str:
