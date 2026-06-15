@@ -393,23 +393,18 @@ class ParametersWidget(QGroupBox):
         self.cmb_tipo_venc_primeira.setEnabled(not ocultar_blocos)
         self.spn_dias_primeira.setEnabled(not ocultar_blocos)
 
-    def _on_tipo_inicio_changed(self) -> None:
-        if not self.cmb_tipo_inicio_periodo.isEnabled():
-            return
+        self._on_tipo_inicio_changed()
+        self._on_tipo_primeira_changed()
 
+    def _on_tipo_inicio_changed(self) -> None:
         codigo = self._combo_value(self.cmb_tipo_inicio_periodo)
         if codigo == "V":
-            self.spn_dia_inicio_periodo.setValue(0)
-            self.spn_dia_inicio_periodo.setEnabled(False)
             self.spn_dia_inicio_periodo.setValue(0)
             self.spn_dia_inicio_periodo.setEnabled(False)
         else:
             self.spn_dia_inicio_periodo.setEnabled(True)
 
     def _on_tipo_primeira_changed(self) -> None:
-        if not self.cmb_tipo_venc_primeira.isEnabled():
-            return
-
         codigo = self._combo_value(self.cmb_tipo_venc_primeira)
         if codigo == "M":
             self.spn_dias_primeira.setValue(0)
