@@ -24,7 +24,7 @@ class AppParams:
     apenas_dias_uteis_calculo_prazo: str
     tipo_inicio_periodo_vencimento: str
     tipo_vencimento_primeira_parc: str
-    tipo_retencao_cartao: str
+    tipo_retencao_cartao_por_credenciadora: dict[str, str]
 
 
 @dataclass(slots=True)

@@ -141,6 +141,21 @@ class GenerationService:
             )
         
         return int(credenciadora_cnpj)
+    
+    @staticmethod
+    def get_tipo_retencao_cartao(params: AppParams, credenciadora: str) -> str:
+        cred_normalizada = normalize_text(credenciadora)
+
+        tipo_retencao = params.tipo_retencao_cartao_por_credenciadora.get(
+            cred_normalizada
+        )
+
+        if not tipo_retencao:
+            raise ValidationError(
+                f"Informe o tipo de retenção da credenciadora '{cred_normalizada}'."
+            )
+
+        return str(tipo_retencao)
 
     @classmethod
     def build_outputs(cls, file_bytes: bytes, params: AppParams) -> OutputBundle:
@@ -159,6 +174,10 @@ class GenerationService:
                 sequence += 1
                 portador_id = portador_map[(entry["credenciadora"], entry["bandeira"], entry["tipo"])]
                 credenciadora_cnpj = cls.get_credenciadora_cnpj(
+                    params,
+                    str(entry["credenciadora"]),
+                )
+                tipo_retencao_cartao = cls.get_tipo_retencao_cartao(
                     params,
                     str(entry["credenciadora"]),
                 )
@@ -187,7 +206,7 @@ class GenerationService:
                     "BANDEIRA_CARTAO": cls.bandeira_cod(str(entry["bandeira"])),
                     "TIPO_PARCELAMENTO": params.tipo_parcelamento,
                     "TIPO_COBRANCA_RETENCAO": params.tipo_cobranca_retencao,
-                    "TIPO_RETENCAO_CARTAO": params.tipo_retencao_cartao,
+                    "TIPO_RETENCAO_CARTAO": tipo_retencao_cartao,
                     "VENCIMENTO_PARC_PROX_DIA_UTIL": params.vencimento_parc_prox_dia_util,
                     "RECEBIMENTO_UNICO_PAG_SEGURO": params.recebimento_unico_pag_seguro,
                     "APENAS_DIAS_UTEIS_CALCULO_PRAZO": params.apenas_dias_uteis_calculo_prazo,

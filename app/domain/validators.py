@@ -75,6 +75,17 @@ def validate_app_params(params) -> None:
             "Informe o código das credenciadoras encontradas na planilha."
         )
     
+    if not params.tipo_retencao_cartao_por_credenciadora:
+        raise ValidationError(
+            "Informe o tipo de retenção das credenciadoras encontradas na planilha."
+        )
+
+    for credenciadora, tipo in params.tipo_retencao_cartao_por_credenciadora.items():
+        if tipo not in {"G", "C", "P"}:
+            raise ValidationError(
+                f"Tipo de retenção inválido para a credenciadora '{credenciadora}'."
+            )
+    
     for credenciadora, cnpj in params.credenciadora_cnpjs.items():
         cnpj_limpo = str(cnpj).strip()
         

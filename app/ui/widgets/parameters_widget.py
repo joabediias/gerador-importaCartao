@@ -42,6 +42,7 @@ class ParametersWidget(QGroupBox):
         )
 
         self.credenciadora_inputs: dict[str, QLineEdit] = {}
+        self.tipo_retencao_inputs: dict[str, object] = {}
 
         self._build_general_section()
         self._build_credenciadoras_section()
@@ -317,16 +318,41 @@ class ParametersWidget(QGroupBox):
             field.setMinimumWidth(0)
             field.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
+            combo_retencao = create_combo_from_options(
+                TIPO_RETENCAO_CARTAO_OPTIONS,
+                "G",
+            )
+            combo_retencao.setMinimumHeight(36)
+            combo_retencao.setMinimumWidth(0)
+            combo_retencao.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
             self.credenciadora_inputs[credenciadora] = field
+            self.tipo_retencao_inputs[credenciadora] = combo_retencao
+
+            linha = row
+
             add_labeled_widget(
                 self.credenciadoras_grid,
-                row,
+                linha,
                 0,
                 f"{credenciadora} CNPJ",
                 field,
             )
 
+            add_labeled_widget(
+                self.credenciadoras_grid,
+                linha,
+                2,
+                "Tipo retenção",
+                combo_retencao,
+            )
         self.box_credenciadoras.setVisible(True)
+
+    def get_tipo_retencao_por_credenciadora(self) -> dict[str, str]:
+        return {
+            credenciadora: str(combo.currentData())
+            for credenciadora, combo in self.tipo_retencao_inputs.items()
+        }
 
     # ========================================================
     # Regras de comportamento entre campos
@@ -416,5 +442,5 @@ class ParametersWidget(QGroupBox):
             apenas_dias_uteis_calculo_prazo=self._checkbox_value(self.chk_apenas_uteis),
             tipo_inicio_periodo_vencimento=self._combo_value(self.cmb_tipo_inicio_periodo),
             tipo_vencimento_primeira_parc=self._combo_value(self.cmb_tipo_venc_primeira),
-            tipo_retencao_cartao=self._combo_value(self.cmb_tipo_retencao_cartao),
+            tipo_retencao_cartao_por_credenciadora=self.get_tipo_retencao_por_credenciadora(),
         )
