@@ -110,10 +110,6 @@ class ParametersWidget(QGroupBox):
             TIPO_COBRANCA_RETENCAO_OPTIONS, "P"
         )
 
-        self.cmb_tipo_retencao_cartao = create_combo_from_options(
-            TIPO_RETENCAO_CARTAO_OPTIONS, "G"
-        )
-
         add_labeled_widget(
             grid,
             0,
@@ -134,13 +130,6 @@ class ParametersWidget(QGroupBox):
             0,
             "Tipo de cobrança da retenção",
             self.cmb_tipo_cobranca,
-        )
-        add_labeled_widget(
-            grid,
-            3,
-            0,
-            "Tipo de retenção cartão",
-            self.cmb_tipo_retencao_cartao,
         )
 
         self.box_regras.layout().addLayout(grid)
@@ -262,7 +251,6 @@ class ParametersWidget(QGroupBox):
             self.cmb_tipo_venc_parcelas,
             self.cmb_tipo_inicio_periodo,
             self.cmb_tipo_venc_primeira,
-            self.cmb_tipo_retencao_cartao,
         ]:
             combo.setMinimumHeight(36)
             combo.setMinimumWidth(0)
