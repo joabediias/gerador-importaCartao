@@ -181,6 +181,11 @@ class GenerationService:
                     params,
                     str(entry["credenciadora"]),
                 )
+                qtd_parcelas_dia_fixo_venc = (
+                    0
+                    if params.tipo_vencimento_parcelas == "U"
+                    else int(entry["parcelas"])
+                )
                 cartoes_rows.append({
                     "CHAVE_IMPORTACAO": chave,
                     "NOME": cls.build_nome_cartao(entry["credenciadora"], entry["bandeira"], entry["tipo"], int(entry["parcelas"])),
@@ -198,7 +203,7 @@ class GenerationService:
                     "TIPO_VENCIMENTO_PARCELAS": params.tipo_vencimento_parcelas,
                     "DIA_INICIO_PERIODO_VENCIMENTO": params.dia_inicio_periodo_vencimento,
                     "DIAS_PARA_VENC_PRIMEIRA_PARC": params.dias_para_venc_primeira_parc,
-                    "QTD_PARCELAS_DIA_FIXO_VENC": int(entry["parcelas"]),
+                    "QTD_PARCELAS_DIA_FIXO_VENC": qtd_parcelas_dia_fixo_venc,
                     "CREDENCIADORA_CNPJ": credenciadora_cnpj,
                     "UTILIZAR_EM_VENDAS_WEB": params.utilizar_em_vendas_web,
                     "FORMA_CALC_DIF_CARTAO_PARC": params.forma_calc_dif_cartao_parc,
