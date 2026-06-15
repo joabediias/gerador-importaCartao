@@ -195,7 +195,14 @@ class GenerationService:
                     "TIPO_VENCIMENTO_PRIMEIRA_PARC": params.tipo_vencimento_primeira_parc,
                 })
 
-                prazos_rows.append({"CHAVE_IMPORTACAO": chave, "DIAS": int(entry["dias"])})
+                dias_base = int(entry["dias"])
+                parcelas = int(entry["parcelas"])
+
+                for parcela in range(1, parcelas + 1):
+                    prazos_rows.append({
+                        "CHAVE_IMPORTACAO": chave,
+                        "DIAS": dias_base * parcela,
+                    })
 
                 for empresa_id in entry["empresas"]:
                     retencoes_rows.append({
