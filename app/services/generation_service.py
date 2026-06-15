@@ -187,7 +187,7 @@ class GenerationService:
                     "BANDEIRA_CARTAO": cls.bandeira_cod(str(entry["bandeira"])),
                     "TIPO_PARCELAMENTO": params.tipo_parcelamento,
                     "TIPO_COBRANCA_RETENCAO": params.tipo_cobranca_retencao,
-                    "TIPO_RETENCAO_CARTAO": cls.tipo_retencao_cartao(str(entry["credenciadora"])),
+                    "TIPO_RETENCAO_CARTAO": params.tipo_retencao_cartao,
                     "VENCIMENTO_PARC_PROX_DIA_UTIL": params.vencimento_parc_prox_dia_util,
                     "RECEBIMENTO_UNICO_PAG_SEGURO": params.recebimento_unico_pag_seguro,
                     "APENAS_DIAS_UTEIS_CALCULO_PRAZO": params.apenas_dias_uteis_calculo_prazo,

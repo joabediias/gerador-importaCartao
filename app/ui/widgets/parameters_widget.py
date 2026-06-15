@@ -11,6 +11,7 @@ from app.domain.mappings import (
     TIPO_RECEBIMENTO_OPTIONS,
     TIPO_VENCIMENTO_PARCELAS_OPTIONS,
     TIPO_VENCIMENTO_PRIMEIRA_PARC_OPTIONS,
+    TIPO_RETENCAO_CARTAO_OPTIONS
 )
 from app.domain.models import AppParams
 from app.ui.widgets.form_fields import (
@@ -107,6 +108,10 @@ class ParametersWidget(QGroupBox):
             TIPO_COBRANCA_RETENCAO_OPTIONS, "P"
         )
 
+        self.cmb_tipo_retencao_cartao = create_combo_from_options(
+            TIPO_RETENCAO_CARTAO_OPTIONS, "G"
+        )
+
         add_labeled_widget(
             grid,
             0,
@@ -127,6 +132,13 @@ class ParametersWidget(QGroupBox):
             0,
             "Tipo de cobrança da retenção",
             self.cmb_tipo_cobranca,
+        )
+        add_labeled_widget(
+            grid,
+            3,
+            0,
+            "Tipo de retenção cartão",
+            self.cmb_tipo_retencao_cartao,
         )
 
         self.box_regras.layout().addLayout(grid)
@@ -248,6 +260,7 @@ class ParametersWidget(QGroupBox):
             self.cmb_tipo_venc_parcelas,
             self.cmb_tipo_inicio_periodo,
             self.cmb_tipo_venc_primeira,
+            self.cmb_tipo_retencao_cartao,
         ]:
             combo.setMinimumHeight(36)
             combo.setMinimumWidth(0)
@@ -401,4 +414,5 @@ class ParametersWidget(QGroupBox):
             apenas_dias_uteis_calculo_prazo=self._checkbox_value(self.chk_apenas_uteis),
             tipo_inicio_periodo_vencimento=self._combo_value(self.cmb_tipo_inicio_periodo),
             tipo_vencimento_primeira_parc=self._combo_value(self.cmb_tipo_venc_primeira),
+            tipo_retencao_cartao=self._combo_value(self.cmb_tipo_retencao_cartao),
         )

@@ -113,3 +113,9 @@ CREDENCIADORA_IDS = {
   "REDE": 42,
   "CIELO": 37
 }
+
+TIPO_RETENCAO_CARTAO_OPTIONS = [
+    ("Getnet", "G"),
+    ("Cielo", "C"),
+    ("PagSeguro", "P"),
+]

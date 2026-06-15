@@ -24,6 +24,7 @@ class AppParams:
     apenas_dias_uteis_calculo_prazo: str
     tipo_inicio_periodo_vencimento: str
     tipo_vencimento_primeira_parc: str
+    tipo_retencao_cartao: str
 
 
 @dataclass(slots=True)
