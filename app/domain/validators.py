@@ -70,13 +70,25 @@ def validate_app_params(params) -> None:
             "informe um valor maior que 0."
         )
     
-    if not params.credenciadora_ids:
+    if not params.credenciadora_cnpjs:
         raise ValidationError(
             "Informe o código das credenciadoras encontradas na planilha."
         )
     
-    for credenciadora, credenciadora_id in params.credenciadora_ids.items():
-        if credenciadora_id <= 0:
+    for credenciadora, cnpj in params.credenciadora_cnpjs.items():
+        cnpj_limpo = str(cnpj).strip()
+        
+        if not cnpj_limpo:
             raise ValidationError(
-                f"Informe um código válido para a credenciadora '{credenciadora}'."
+                f"Informe o CNPJ da credenciadora '{credenciadora}'."
+            )
+
+        if len(cnpj_limpo) != 14:
+            raise ValidationError(
+                f"O CNPJ da credenciadora '{credenciadora}' deve ter 14 dígitos."
+            )
+
+        if not cnpj_limpo.isdigit():
+            raise ValidationError(
+                f"O CNPJ da credenciadora '{credenciadora}' deve conter apenas números."
             )

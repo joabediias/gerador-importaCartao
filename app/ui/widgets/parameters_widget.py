@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from PySide6.QtWidgets import QGridLayout, QGroupBox, QVBoxLayout, QSizePolicy, QSpinBox
+from PySide6.QtWidgets import QGridLayout, QGroupBox, QVBoxLayout, QSizePolicy, QSpinBox, QLineEdit
 from app.utils.parsing import normalize_text
 
 from app.domain.mappings import (
@@ -41,7 +41,7 @@ class ParametersWidget(QGroupBox):
             SectionHeader("Parâmetros da importação")
         )
 
-        self.credenciadora_inputs: dict[str, QSpinBox] = {}
+        self.credenciadora_inputs: dict[str, QLineEdit] = {}
 
         self._build_general_section()
         self._build_credenciadoras_section()
@@ -310,18 +310,20 @@ class ParametersWidget(QGroupBox):
             return
 
         for row, credenciadora in enumerate(credenciadoras_normalizadas):
-            spin = create_spinbox(1, 999999, 1)
-            spin.setMinimumHeight(36)
-            spin.setMinimumWidth(0)
-            spin.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+            field = QLineEdit()
+            field.setMaxLength(14)
+            field.setPlaceholderText("CNPJ da credenciadora")
+            field.setMinimumHeight(36)
+            field.setMinimumWidth(0)
+            field.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
-            self.credenciadora_inputs[credenciadora] = spin
+            self.credenciadora_inputs[credenciadora] = field
             add_labeled_widget(
                 self.credenciadoras_grid,
                 row,
                 0,
-                f"{credenciadora} ID",
-                spin,
+                f"{credenciadora} CNPJ",
+                field,
             )
 
         self.box_credenciadoras.setVisible(True)
@@ -387,10 +389,10 @@ class ParametersWidget(QGroupBox):
         else:
             self.spn_dias_primeira.setEnabled(True)
 
-    def get_credenciadora_ids(self) -> dict[str, int]:
+    def get_credenciadora_cnpjs(self) -> dict[str, int]:
         return {
-            credenciadora: spin.value()
-            for credenciadora, spin in self.credenciadora_inputs.items()
+            credenciadora: field.text().strip()
+            for credenciadora, field in self.credenciadora_inputs.items()
         }
     
     # ========================================================
@@ -400,7 +402,7 @@ class ParametersWidget(QGroupBox):
         return AppParams(
             tipo_recebimento=self._combo_value(self.cmb_tipo_recebimento),
             liberada_cons_final_padrao=self._checkbox_value(self.chk_liberada),
-            credenciadora_ids=self.get_credenciadora_ids(),
+            credenciadora_cnpjs=self.get_credenciadora_cnpjs(),
             utilizar_em_vendas_web=self._checkbox_value(self.chk_vendas_web),
             forma_calc_dif_cartao_parc=self._combo_value(self.cmb_forma_calc),
             perm_vincular_crt_aut_caixa=self._checkbox_value(self.chk_perm_vincular),

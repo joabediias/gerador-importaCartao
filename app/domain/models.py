@@ -10,7 +10,7 @@ import pandas as pd
 class AppParams:
     tipo_recebimento: str
     liberada_cons_final_padrao: str
-    credenciadora_ids: dict[str, int]
+    credenciadora_cnpjs: dict[str, str]
     utilizar_em_vendas_web: str
     forma_calc_dif_cartao_parc: str
     perm_vincular_crt_aut_caixa: str

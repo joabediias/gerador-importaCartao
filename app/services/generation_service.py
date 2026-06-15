@@ -130,17 +130,17 @@ class GenerationService:
         return pd.DataFrame(rows), seen
 
     @staticmethod
-    def get_credenciadora_id(params: AppParams, credenciadora: str) -> int:
+    def get_credenciadora_cnpj(params: AppParams, credenciadora: str) -> int:
         cred_normalizada = normalize_text(credenciadora)
 
-        credenciadora_id = params.credenciadora_ids.get(cred_normalizada)
+        credenciadora_cnpj = params.credenciadora_cnpjs.get(cred_normalizada)
 
-        if credenciadora_id is None:
+        if credenciadora_cnpj is None:
             raise ValidationError(
                 f"Informe o código da credenciadora '{cred_normalizada}' antes de gerar os arquivos."
             )
         
-        return int(credenciadora_id)
+        return int(credenciadora_cnpj)
 
     @classmethod
     def build_outputs(cls, file_bytes: bytes, params: AppParams) -> OutputBundle:
@@ -158,7 +158,7 @@ class GenerationService:
                 chave = f"{entry['credenciadora']}{sequence}"
                 sequence += 1
                 portador_id = portador_map[(entry["credenciadora"], entry["bandeira"], entry["tipo"])]
-                credenciadora_id = cls.get_credenciadora_id(
+                credenciadora_cnpj = cls.get_credenciadora_cnpj(
                     params,
                     str(entry["credenciadora"]),
                 )
@@ -180,7 +180,7 @@ class GenerationService:
                     "DIA_INICIO_PERIODO_VENCIMENTO": params.dia_inicio_periodo_vencimento,
                     "DIAS_PARA_VENC_PRIMEIRA_PARC": params.dias_para_venc_primeira_parc,
                     "QTD_PARCELAS_DIA_FIXO_VENC": int(entry["parcelas"]),
-                    "CREDENCIADORA_ID": credenciadora_id,
+                    "CREDENCIADORA_CNPJ": credenciadora_cnpj,
                     "UTILIZAR_EM_VENDAS_WEB": params.utilizar_em_vendas_web,
                     "FORMA_CALC_DIF_CARTAO_PARC": params.forma_calc_dif_cartao_parc,
                     "PERM_VINCULAR_CRT_AUT_CAIXA": params.perm_vincular_crt_aut_caixa,
