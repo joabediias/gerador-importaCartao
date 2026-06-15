@@ -11,7 +11,8 @@ from app.domain.mappings import (
     TIPO_RECEBIMENTO_OPTIONS,
     TIPO_VENCIMENTO_PARCELAS_OPTIONS,
     TIPO_VENCIMENTO_PRIMEIRA_PARC_OPTIONS,
-    TIPO_RETENCAO_CARTAO_OPTIONS
+    TIPO_RETENCAO_CARTAO_OPTIONS,
+    CREDENCIADORA_CNPJ_MAP
 )
 from app.domain.models import AppParams
 from app.ui.widgets.form_fields import (
@@ -314,6 +315,7 @@ class ParametersWidget(QGroupBox):
             field = QLineEdit()
             field.setMaxLength(14)
             field.setPlaceholderText("CNPJ da credenciadora")
+            field.setText(CREDENCIADORA_CNPJ_MAP.get(credenciadora, ""))
             field.setMinimumHeight(36)
             field.setMinimumWidth(0)
             field.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
