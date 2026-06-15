@@ -209,8 +209,6 @@ class GenerationService:
                         "CHAVE_IMPORTACAO": chave,
                         "EMPRESA_ID": int(empresa_id),
                         "TAXA_COBRANCA": entry["taxa"],
-                        "NOVA_TAXA_COBRANCA": 0,
-                        "DATA_NOVA_TAXA_COBRANCA": "",
                         "EMPRESA_USA_CARTAO": "S",
                     })
 
