@@ -20,6 +20,21 @@ BANDEIRA_TEF_MAP = {
     "DINERS": "DINERS",
     "CABAL": "CABAL",
     "SOROCRED": "SOROCRED",
+    "AGIPLAN": "AGIPLAN",
+    "BANESCARD": "BANESCARD",
+    "CREDSYSTEM": "CREDSYSTEM",
+    "ESPLANADA": "ESPLANADA",
+    "CREDZ": "CREDZ",
+    "JCB": "JCB",
+    "SICREDI": "SICREDI",
+    "AVISTA": "AVISTA",
+    "DISCOVER": "DISCOVER",
+    "OUROCARD": "OUROCARD",
+    "BANRICOMPRAS": "BANRICOMPRAS",
+    "UNIONPAY": "UNIONPAY",
+    "MAIS": "MAIS",
+    "BNDS": "BNDS",
+    "CUP": "CUP",
 }
 
 BANDEIRA_COD_MAP = {
@@ -45,6 +60,8 @@ BANDEIRA_COD_MAP = {
     "JCB": "JCB",
     "OUROCARD": "OUR",
     "BANRICOMPRAS": "BAR",
+    "UNIONPAY": "UNI",
+    "MAIS": "MAI",
 }
 
 REDE_CREDITO_MAP = {
@@ -108,11 +125,6 @@ TIPO_VENCIMENTO_PRIMEIRA_PARC_OPTIONS = [
     ("Proximo mes", "M"),
     ("Qtd. de dias", "D"),
 ]
-
-CREDENCIADORA_IDS = {
-  "REDE": 42,
-  "CIELO": 37
-}
 
 TIPO_RETENCAO_CARTAO_OPTIONS = [
     ("Getnet", "G"),
