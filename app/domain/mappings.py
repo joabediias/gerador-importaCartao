@@ -37,6 +37,24 @@ BANDEIRA_TEF_MAP = {
     "CUP": "CUP",
 }
 
+REDE_TEF_MAP = {
+    "BIN": "BIN",
+    "REDE": "REDECARD",
+    "REDECARD": "REDECARD",
+    "CIELO": "CIELO",
+    "PAGBANK": "PAGBANK",
+    "PAGSEGURO": "PAGBANK",
+    "PAG SEGURO": "PAGBANK",
+    "STONE": "STONE",
+    "GETNET": "GETNET",
+    "SAFRA PAY": "SAFRA PAY",
+    "SAFRAPAY": "SAFRA PAY",
+    "MERCADO PAGO": "MERCADO PAGO",
+    "MERCADOPAGO": "MERCADO PAGO",
+    "SIPAG": "SIPAG",
+    "SICREDI": "SICREDI",
+}
+
 BANDEIRA_COD_MAP = {
     "VISA": "VIS",
     "MASTERCARD": "MAS",

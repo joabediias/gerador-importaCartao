@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (
     QTableWidgetItem,
     QVBoxLayout,
     QWidget,
+    QAbstractItemView, 
 )
 
 from app.ui.widgets.section_header import SectionHeader
@@ -76,9 +77,12 @@ class OutputTabsWidget(QGroupBox):
         self.tabs.addTab(empty_page, "Aguardando geração")
 
     def populate(self, outputs: dict[str, pd.DataFrame]) -> None:
+        MAX_PREVIEW_ROWS = 1000
+
         self.tabs.clear()
 
         if not outputs:
+            self.btn_save_csvs.setEnabled(False)
             self.show_empty_state()
             return
 
@@ -86,14 +90,62 @@ class OutputTabsWidget(QGroupBox):
 
         for filename, df in outputs.items():
             table = QTableWidget()
-            table.setColumnCount(len(df.columns))
-            table.setHorizontalHeaderLabels([str(c) for c in df.columns])
-            table.setRowCount(min(len(df), 200))
 
-            for row_idx in range(min(len(df), 200)):
-                for col_idx, col_name in enumerate(df.columns):
-                    value = "" if pd.isna(df.iloc[row_idx, col_idx]) else str(df.iloc[row_idx, col_idx])
-                    table.setItem(row_idx, col_idx, QTableWidgetItem(value))
+            table.setColumnCount(len(df.columns))
+            table.setHorizontalHeaderLabels(
+                [str(column) for column in df.columns]
+            )
+
+            total_rows = len(df)
+            preview_rows = min(total_rows, MAX_PREVIEW_ROWS)
+
+            table.setRowCount(preview_rows)
+
+            preview_data = (
+                df.head(preview_rows)
+                .fillna("")
+                .astype(str)
+                .values
+                .tolist()
+            )
+
+            table.setUpdatesEnabled(False)
+
+            try:
+                for row_idx, row in enumerate(preview_data):
+                    for col_idx, value in enumerate(row):
+                        table.setItem(
+                            row_idx,
+                            col_idx,
+                            QTableWidgetItem(value),
+                        )
+            finally:
+                table.setUpdatesEnabled(True)
+
+            table.setAlternatingRowColors(True)
+            table.setSortingEnabled(True)
+
+            table.setEditTriggers(
+                QAbstractItemView.EditTrigger.NoEditTriggers
+            )
+
+            table.setSelectionBehavior(
+                QAbstractItemView.SelectionBehavior.SelectRows
+            )
+
+            table.setSelectionMode(
+                QAbstractItemView.SelectionMode.SingleSelection
+            )
 
             table.resizeColumnsToContents()
-            self.tabs.addTab(table, filename)
+            table.horizontalHeader().setStretchLastSection(True)
+
+            tab_title = filename
+
+            if total_rows > MAX_PREVIEW_ROWS:
+                tab_title = (
+                    f"{filename} "
+                    f"({preview_rows}/{total_rows} linhas)"
+                )
+
+            self.tabs.addTab(table, tab_title)

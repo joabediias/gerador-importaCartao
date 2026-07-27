@@ -4,7 +4,7 @@ from typing import Dict, List, Tuple
 
 import pandas as pd
 
-from app.domain.mappings import BANDEIRA_COD_MAP, BANDEIRA_TEF_MAP, REDE_CREDITO_MAP, TIPO_RETENCAO_MAP
+from app.domain.mappings import BANDEIRA_COD_MAP, BANDEIRA_TEF_MAP, REDE_CREDITO_MAP, REDE_TEF_MAP, TIPO_RETENCAO_MAP
 from app.domain.models import AppParams, OutputBundle
 from app.domain.validators import ValidationError
 from app.services.excel_service import ExcelService
@@ -14,11 +14,12 @@ from app.utils.parsing import normalize_text, parse_empresas, parse_numeric
 class GenerationService:
     @staticmethod
     def rede_cartao_tef(credenciadora: str) -> str:
-        if credenciadora == "CIELO":
-            return "CIELO"
-        if credenciadora in {"REDE", "REDECARD"}:
-            return "REDECARD"
-        return "GETNET"
+        credenciadora_normalizada = normalize_text(credenciadora)
+
+        return REDE_TEF_MAP.get(
+            credenciadora_normalizada,
+            "credenciadora_normalizada",
+        )
 
     @staticmethod
     def rede_cartao_credito(credenciadora: str) -> str:
