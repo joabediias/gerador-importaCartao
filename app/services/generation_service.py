@@ -22,7 +22,8 @@ class GenerationService:
 
     @staticmethod
     def rede_cartao_credito(credenciadora: str) -> str:
-        return REDE_CREDITO_MAP.get(credenciadora, "G")
+        credenciadora = normalize_text(credenciadora)
+        return REDE_CREDITO_MAP.get(credenciadora, "V")
 
     @staticmethod
     def tipo_retencao_cartao(credenciadora: str) -> str:
@@ -33,12 +34,23 @@ class GenerationService:
         return "D" if tipo == "DEBITO" else "C"
 
     @staticmethod
-    def bandeira_tef(bandeira: str) -> str:
-        return BANDEIRA_TEF_MAP.get(bandeira, bandeira)
+    def bandeira_tef(bandeira: str, tipo: str) -> str:
+        bandeira_normalizada = normalize_text(bandeira)
+        tipo_normalizado = normalize_text(tipo)
+
+        nome_bandeira = BANDEIRA_TEF_MAP.get(
+            bandeira_normalizada,
+            bandeira_normalizada,
+        )
+
+        tipo_tef = "DEBITO" if tipo_normalizado == "DEBITO" else "CREDITO"
+
+        return f"{nome_bandeira} {tipo_tef}"
 
     @staticmethod
     def bandeira_cod(bandeira: str) -> str:
-        return BANDEIRA_COD_MAP.get(bandeira, bandeira[:3])
+        bandeira = normalize_text(bandeira)
+        return BANDEIRA_COD_MAP.get(bandeira, bandeira[:3].upper(),)
 
     @staticmethod
     def build_nome_cartao(cred: str, bandeira: str, tipo: str, parcelas: int, recebimento: str,) -> str:
@@ -191,7 +203,7 @@ class GenerationService:
                     "NOME": cls.build_nome_cartao(str(entry["credenciadora"]), str(entry["bandeira"]), str(entry["tipo"]), int(entry["parcelas"]),recebimento,),
                     "NUMERO_CONTRATO": "X",
                     "REDE_CARTAO_TEF": cls.rede_cartao_tef(str(entry["credenciadora"])),
-                    "BANDEIRA_CARTAO_TEF": cls.bandeira_tef(str(entry["bandeira"])),
+                    "BANDEIRA_CARTAO_TEF": cls.bandeira_tef(str(entry["bandeira"]), str(entry["tipo"])),
                     "PORTADOR_ID": portador_id,
                     "TIPO_CARTAO": cls.tipo_cartao(str(entry["tipo"])),
                     "TIPO_RECEBIMENTO": recebimento,
