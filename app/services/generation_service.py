@@ -250,8 +250,8 @@ class GenerationService:
                     })
 
         return OutputBundle(tables={
-            "portadores.csv": portadores_df,
-            "cartoes.csv": pd.DataFrame(cartoes_rows),
-            "prazos.csv": pd.DataFrame(prazos_rows),
-            "retencoes.csv": pd.DataFrame(retencoes_rows),
+            "FINANCEIROS_PORTADORES.csv": portadores_df,
+            "CARTOES_CARTOES.csv": pd.DataFrame(cartoes_rows),
+            "CARTOES_PRAZOS.csv": pd.DataFrame(prazos_rows),
+            "CARTOES_RETENCOES.csv": pd.DataFrame(retencoes_rows),
         })
