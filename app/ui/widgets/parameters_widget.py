@@ -67,9 +67,7 @@ class ParametersWidget(QGroupBox):
             TIPO_RECEBIMENTO_OPTIONS, "POS"
         )
 
-        self.codigo_inicial_portador_input = QSpinBox()
-        self.codigo_inicial_portador_input.setRange(1, 999999999)
-        self.codigo_inicial_portador_input.setValue(1000)
+        self.codigo_inicial_portador_input = create_spinbox(1,9999,1000,)
         self.codigo_inicial_portador_input.setToolTip(
             "Código inicial utilizado na geração dos portadores."
         )
