@@ -209,11 +209,33 @@ class GenerationService:
                     params,
                     str(entry["credenciadora"]),
                 )
-                qtd_parcelas_dia_fixo_venc = (
-                    0
-                    if params.tipo_vencimento_parcelas == "U"
-                    else int(entry["parcelas"])
-                )
+                eh_debito = str(entry["tipo"]) == "DEBITO"
+
+                if eh_debito:
+                    tipo_vencimento_parcelas = "U"
+                    dia_inicio_periodo_vencimento = 0
+                    dias_para_venc_primeira_parc = 0
+                    qtd_parcelas_dia_fixo_venc = 0
+                    tipo_inicio_periodo_vencimento = "V"
+                    tipo_vencimento_primeira_parc = "M"
+                else:
+                    tipo_vencimento_parcelas = params.tipo_vencimento_parcelas
+                    dia_inicio_periodo_vencimento = params.dia_inicio_periodo_vencimento
+                    dias_para_venc_primeira_parc = params.dias_para_venc_primeira_parc
+
+                    qtd_parcelas_dia_fixo_venc = (
+                        0
+                        if params.tipo_vencimento_parcelas == "U"
+                        else int(entry["parcelas"])
+                    )
+
+                    tipo_inicio_periodo_vencimento = (
+                        params.tipo_inicio_periodo_vencimento
+                    )
+
+                    tipo_vencimento_primeira_parc = (
+                        params.tipo_vencimento_primeira_parc
+                    )
                 cartoes_rows.append({
                     "CHAVE_IMPORTACAO": chave,
                     "NOME": cls.build_nome_cartao(str(entry["credenciadora"]), str(entry["bandeira"]), str(entry["tipo"]), int(entry["parcelas"]),recebimento,),
@@ -228,9 +250,9 @@ class GenerationService:
                     "AJUSTAR_PARC_CART_IMP_FISCAL": "S",
                     "LIBERADA_CONS_FINAL_PADRAO": params.liberada_cons_final_padrao,
                     "REDE_CARTAO_CREDITO": cls.rede_cartao_credito(str(entry["credenciadora"])),
-                    "TIPO_VENCIMENTO_PARCELAS": params.tipo_vencimento_parcelas,
-                    "DIA_INICIO_PERIODO_VENCIMENTO": params.dia_inicio_periodo_vencimento,
-                    "DIAS_PARA_VENC_PRIMEIRA_PARC": params.dias_para_venc_primeira_parc,
+                    "TIPO_VENCIMENTO_PARCELAS": tipo_vencimento_parcelas,
+                    "DIA_INICIO_PERIODO_VENCIMENTO": dia_inicio_periodo_vencimento,
+                    "DIAS_PARA_VENC_PRIMEIRA_PARC": dias_para_venc_primeira_parc,
                     "QTD_PARCELAS_DIA_FIXO_VENC": qtd_parcelas_dia_fixo_venc,
                     "CREDENCIADORA_CNPJ": credenciadora_cnpj,
                     "UTILIZAR_EM_VENDAS_WEB": params.utilizar_em_vendas_web,
@@ -243,8 +265,8 @@ class GenerationService:
                     "VENCIMENTO_PARC_PROX_DIA_UTIL": params.vencimento_parc_prox_dia_util,
                     "RECEBIMENTO_UNICO_PAG_SEGURO": params.recebimento_unico_pag_seguro,
                     "APENAS_DIAS_UTEIS_CALCULO_PRAZO": params.apenas_dias_uteis_calculo_prazo,
-                    "TIPO_INICIO_PERIODO_VENCIMENTO": params.tipo_inicio_periodo_vencimento,
-                    "TIPO_VENCIMENTO_PRIMEIRA_PARC": params.tipo_vencimento_primeira_parc,
+                    "TIPO_INICIO_PERIODO_VENCIMENTO": tipo_inicio_periodo_vencimento,
+                    "TIPO_VENCIMENTO_PRIMEIRA_PARC": tipo_vencimento_primeira_parc,
                 })
 
                 dias_base = int(entry["dias"])
