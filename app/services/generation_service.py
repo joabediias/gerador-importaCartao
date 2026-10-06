@@ -18,7 +18,7 @@ class GenerationService:
 
         return REDE_TEF_MAP.get(
             credenciadora_normalizada,
-            "credenciadora_normalizada",
+            credenciadora_normalizada,
         )
 
     @staticmethod
@@ -126,20 +126,35 @@ class GenerationService:
         return entries
 
     @staticmethod
-    def build_portadores(entries: List[Dict[str, object]]) -> Tuple[pd.DataFrame, Dict[Tuple[str, str, str], int]]:
+    def build_portadores (entries: List[Dict[str, object]],codigo_inicial: int,) -> Tuple[pd.DataFrame, Dict[Tuple[str, str, str], int]]:
         seen: Dict[Tuple[str, str, str], int] = {}
         rows = []
-        next_id = 1000
+
+        next_id = codigo_inicial
+
         for entry in entries:
-            key = (entry["credenciadora"], entry["bandeira"], entry["tipo"])
+            key = (
+                entry["credenciadora"],
+                entry["bandeira"],
+                entry["tipo"],
+            )
+
             if key in seen:
                 continue
+
             seen[key] = next_id
+
             rows.append({
                 "PORTADOR_ID": next_id,
-                "NOME": f"{entry['bandeira']} {entry['tipo']} - {entry['credenciadora']}",
+                "NOME": (
+                    f"{entry['bandeira']} "
+                    f"{entry['tipo']} - "
+                    f"{entry['credenciadora']}"
+                ),
             })
+
             next_id += 1
+
         return pd.DataFrame(rows), seen
 
     @staticmethod
@@ -174,7 +189,7 @@ class GenerationService:
     def build_outputs(cls, file_bytes: bytes, params: AppParams) -> OutputBundle:
         taxas_df = ExcelService.read_taxas(file_bytes)
         entries = cls.extract_rate_entries(taxas_df)
-        portadores_df, portador_map = cls.build_portadores(entries)
+        portadores_df, portador_map = cls.build_portadores(entries,params.codigo_inicial_portador,)
 
         cartoes_rows = []
         prazos_rows = []

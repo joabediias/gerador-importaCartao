@@ -25,6 +25,7 @@ class AppParams:
     tipo_inicio_periodo_vencimento: str
     tipo_vencimento_primeira_parc: str
     tipo_retencao_cartao_por_credenciadora: dict[str, str]
+    codigo_inicial_portador: int = 1000
 
 
 @dataclass(slots=True)

@@ -67,6 +67,19 @@ class ParametersWidget(QGroupBox):
             TIPO_RECEBIMENTO_OPTIONS, "POS"
         )
 
+        self.codigo_inicial_portador_input = QSpinBox()
+        self.codigo_inicial_portador_input.setRange(1, 999999999)
+        self.codigo_inicial_portador_input.setValue(1000)
+        self.codigo_inicial_portador_input.setToolTip(
+            "Código inicial utilizado na geração dos portadores."
+        )
+        self.codigo_inicial_portador_input.setMinimumHeight(36)
+        self.codigo_inicial_portador_input.setMinimumWidth(0)
+        self.codigo_inicial_portador_input.setSizePolicy(
+            QSizePolicy.Expanding,
+            QSizePolicy.Fixed,
+        )
+
         self.chk_liberada = create_checkbox(
             "Venda liberada para consumidor final", True
         )
@@ -85,13 +98,14 @@ class ParametersWidget(QGroupBox):
         )
 
         add_labeled_widget(grid, 0, 0, "Tipo de recebimento", self.cmb_tipo_recebimento)
+        add_labeled_widget(grid, 1, 0, "Código inicial do portador", self.codigo_inicial_portador_input)
 
-        grid.addWidget(self.chk_liberada, 1, 0, 1, 4)
-        grid.addWidget(self.chk_vendas_web, 2, 0, 1, 4)
-        grid.addWidget(self.chk_perm_vincular, 3, 0, 1, 4)
-        grid.addWidget(self.chk_venc_prox_util, 4, 0, 1, 4)
-        grid.addWidget(self.chk_apenas_uteis, 5, 0, 1, 4)
-        grid.addWidget(self.chk_receb_unico, 6, 0, 1, 4)
+        grid.addWidget(self.chk_liberada, 2, 0, 1, 4)
+        grid.addWidget(self.chk_vendas_web, 3, 0, 1, 4)
+        grid.addWidget(self.chk_perm_vincular, 4, 0, 1, 4)
+        grid.addWidget(self.chk_venc_prox_util, 5, 0, 1, 4)
+        grid.addWidget(self.chk_apenas_uteis, 6, 0, 1, 4)
+        grid.addWidget(self.chk_receb_unico, 7, 0, 1, 4)
 
         self.box_geral.layout().addLayout(grid)
         self.root.addWidget(self.box_geral)
@@ -412,6 +426,7 @@ class ParametersWidget(QGroupBox):
     def get_params(self) -> AppParams:
         return AppParams(
             tipo_recebimento=self._combo_value(self.cmb_tipo_recebimento),
+            codigo_inicial_portador=self.codigo_inicial_portador_input.value(),
             liberada_cons_final_padrao=self._checkbox_value(self.chk_liberada),
             credenciadora_cnpjs=self.get_credenciadora_cnpjs(),
             utilizar_em_vendas_web=self._checkbox_value(self.chk_vendas_web),
