@@ -61,7 +61,7 @@ class SummaryWidget(QGroupBox):
         root.addLayout(row)
 
     def update_counts(self, counts: dict[str, int]) -> None:
-        self.card_portadores.set_value(counts.get("portadores", counts.get("portadores.csv", 0)))
-        self.card_cartoes.set_value(counts.get("cartoes", counts.get("cartoes.csv", 0)))
-        self.card_prazos.set_value(counts.get("prazos", counts.get("prazos.csv", 0)))
-        self.card_retencoes.set_value(counts.get("retencoes", counts.get("retencoes.csv", 0)))
+        self.card_portadores.set_value(counts.get("FINANCEIROS_PORTADORES.csv", 0))
+        self.card_cartoes.set_value(counts.get("CARTOES_CARTOES.csv", 0))
+        self.card_prazos.set_value(counts.get("CARTOES_PRAZOS.csv", 0))
+        self.card_retencoes.set_value(counts.get("CARTOES_RETENCOES.csv", 0))
