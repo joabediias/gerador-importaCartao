@@ -195,93 +195,134 @@ class GenerationService:
         prazos_rows = []
         retencoes_rows = []
         sequence = 1
+        cartoes_criados = {}
+        taxas_por_empresa = {}
+
+        # Identifica quando um mesmo cartão possui mais de um prazo.
+        prazos_por_cartao = {}
+        for entry in entries:
+            for recebimento in cls.recebimento_variants(params.tipo_recebimento):
+                identidade = (
+                    entry["credenciadora"], entry["bandeira"],
+                    entry["tipo"], int(entry["parcelas"]), recebimento,
+                )
+                prazos_por_cartao.setdefault(identidade, set()).add(int(entry["dias"]))
 
         for entry in entries:
             for recebimento in cls.recebimento_variants(params.tipo_recebimento):
-                chave = f"{entry['credenciadora']}{sequence}"
-                sequence += 1
-                portador_id = portador_map[(entry["credenciadora"], entry["bandeira"], entry["tipo"])]
-                credenciadora_cnpj = cls.get_credenciadora_cnpj(
-                    params,
-                    str(entry["credenciadora"]),
-                )
-                tipo_retencao_cartao = cls.get_tipo_retencao_cartao(
-                    params,
-                    str(entry["credenciadora"]),
-                )
-                eh_debito = str(entry["tipo"]) == "DEBITO"
-
-                if eh_debito:
-                    tipo_vencimento_parcelas = "U"
-                    dia_inicio_periodo_vencimento = 0
-                    dias_para_venc_primeira_parc = 0
-                    qtd_parcelas_dia_fixo_venc = 0
-                    tipo_inicio_periodo_vencimento = "V"
-                    tipo_vencimento_primeira_parc = "M"
-                else:
-                    tipo_vencimento_parcelas = params.tipo_vencimento_parcelas
-                    dia_inicio_periodo_vencimento = params.dia_inicio_periodo_vencimento
-                    dias_para_venc_primeira_parc = params.dias_para_venc_primeira_parc
-
-                    qtd_parcelas_dia_fixo_venc = (
-                        0
-                        if params.tipo_vencimento_parcelas == "U"
-                        else int(entry["parcelas"])
-                    )
-
-                    tipo_inicio_periodo_vencimento = (
-                        params.tipo_inicio_periodo_vencimento
-                    )
-
-                    tipo_vencimento_primeira_parc = (
-                        params.tipo_vencimento_primeira_parc
-                    )
-                cartoes_rows.append({
-                    "CHAVE_IMPORTACAO": chave,
-                    "NOME": cls.build_nome_cartao(str(entry["credenciadora"]), str(entry["bandeira"]), str(entry["tipo"]), int(entry["parcelas"]),recebimento,),
-                    "NUMERO_CONTRATO": "X",
-                    "REDE_CARTAO_TEF": cls.rede_cartao_tef(str(entry["credenciadora"])),
-                    "BANDEIRA_CARTAO_TEF": cls.bandeira_tef(str(entry["bandeira"]), str(entry["tipo"])),
-                    "PORTADOR_ID": portador_id,
-                    "TIPO_CARTAO": cls.tipo_cartao(str(entry["tipo"])),
-                    "TIPO_RECEBIMENTO": recebimento,
-                    "ATIVO": "S",
-                    "PARCELAS": int(entry["parcelas"]),
-                    "AJUSTAR_PARC_CART_IMP_FISCAL": "S",
-                    "LIBERADA_CONS_FINAL_PADRAO": params.liberada_cons_final_padrao,
-                    "REDE_CARTAO_CREDITO": cls.rede_cartao_credito(str(entry["credenciadora"])),
-                    "TIPO_VENCIMENTO_PARCELAS": tipo_vencimento_parcelas,
-                    "DIA_INICIO_PERIODO_VENCIMENTO": dia_inicio_periodo_vencimento,
-                    "DIAS_PARA_VENC_PRIMEIRA_PARC": dias_para_venc_primeira_parc,
-                    "QTD_PARCELAS_DIA_FIXO_VENC": qtd_parcelas_dia_fixo_venc,
-                    "CREDENCIADORA_CNPJ": credenciadora_cnpj,
-                    "UTILIZAR_EM_VENDAS_WEB": params.utilizar_em_vendas_web,
-                    "FORMA_CALC_DIF_CARTAO_PARC": params.forma_calc_dif_cartao_parc,
-                    "PERM_VINCULAR_CRT_AUT_CAIXA": params.perm_vincular_crt_aut_caixa,
-                    "BANDEIRA_CARTAO": cls.bandeira_cod(str(entry["bandeira"])),
-                    "TIPO_PARCELAMENTO": params.tipo_parcelamento,
-                    "TIPO_COBRANCA_RETENCAO": params.tipo_cobranca_retencao,
-                    "TIPO_RETENCAO_CARTAO": tipo_retencao_cartao,
-                    "VENCIMENTO_PARC_PROX_DIA_UTIL": params.vencimento_parc_prox_dia_util,
-                    "RECEBIMENTO_UNICO_PAG_SEGURO": params.recebimento_unico_pag_seguro,
-                    "APENAS_DIAS_UTEIS_CALCULO_PRAZO": params.apenas_dias_uteis_calculo_prazo,
-                    "TIPO_INICIO_PERIODO_VENCIMENTO": tipo_inicio_periodo_vencimento,
-                    "TIPO_VENCIMENTO_PRIMEIRA_PARC": tipo_vencimento_primeira_parc,
-                })
-
-                dias_base = int(entry["dias"])
                 parcelas = int(entry["parcelas"])
+                dias_base = int(entry["dias"])
+                identidade = (
+                    entry["credenciadora"], entry["bandeira"],
+                    entry["tipo"], parcelas, recebimento,
+                )
+                cartao_key = (*identidade, dias_base)
 
-                for parcela in range(1, parcelas + 1):
-                    prazos_rows.append({
+                if cartao_key not in cartoes_criados:
+                    chave = f"{entry['credenciadora']}{sequence}"
+                    sequence += 1
+                    cartoes_criados[cartao_key] = chave
+                    portador_id = portador_map[(entry["credenciadora"], entry["bandeira"], entry["tipo"])]
+                    credenciadora_cnpj = cls.get_credenciadora_cnpj(
+                        params,
+                        str(entry["credenciadora"]),
+                    )
+                    tipo_retencao_cartao = cls.get_tipo_retencao_cartao(
+                        params,
+                        str(entry["credenciadora"]),
+                    )
+                    eh_debito = str(entry["tipo"]) == "DEBITO"
+
+                    if eh_debito:
+                        tipo_vencimento_parcelas = "U"
+                        dia_inicio_periodo_vencimento = 0
+                        dias_para_venc_primeira_parc = 0
+                        qtd_parcelas_dia_fixo_venc = 0
+                        tipo_inicio_periodo_vencimento = "V"
+                        tipo_vencimento_primeira_parc = "M"
+                    else:
+                        tipo_vencimento_parcelas = params.tipo_vencimento_parcelas
+                        dia_inicio_periodo_vencimento = params.dia_inicio_periodo_vencimento
+                        dias_para_venc_primeira_parc = params.dias_para_venc_primeira_parc
+
+                        qtd_parcelas_dia_fixo_venc = (
+                            0
+                            if params.tipo_vencimento_parcelas == "U"
+                            else int(entry["parcelas"])
+                        )
+
+                        tipo_inicio_periodo_vencimento = (
+                            params.tipo_inicio_periodo_vencimento
+                        )
+
+                        tipo_vencimento_primeira_parc = (
+                            params.tipo_vencimento_primeira_parc
+                        )
+                    nome_cartao = cls.build_nome_cartao(
+                        str(entry["credenciadora"]), str(entry["bandeira"]),
+                        str(entry["tipo"]), parcelas, recebimento,
+                    )
+                    if len(prazos_por_cartao[identidade]) > 1:
+                        nome_cartao += f" - PRAZO {dias_base} DIAS"
+
+                    cartoes_rows.append({
                         "CHAVE_IMPORTACAO": chave,
-                        "DIAS": dias_base * parcela,
+                        "NOME": nome_cartao,
+                        "NUMERO_CONTRATO": "X",
+                        "REDE_CARTAO_TEF": cls.rede_cartao_tef(str(entry["credenciadora"])),
+                        "BANDEIRA_CARTAO_TEF": cls.bandeira_tef(str(entry["bandeira"]), str(entry["tipo"])),
+                        "PORTADOR_ID": portador_id,
+                        "TIPO_CARTAO": cls.tipo_cartao(str(entry["tipo"])),
+                        "TIPO_RECEBIMENTO": recebimento,
+                        "ATIVO": "S",
+                        "PARCELAS": int(entry["parcelas"]),
+                        "AJUSTAR_PARC_CART_IMP_FISCAL": "S",
+                        "LIBERADA_CONS_FINAL_PADRAO": params.liberada_cons_final_padrao,
+                        "REDE_CARTAO_CREDITO": cls.rede_cartao_credito(str(entry["credenciadora"])),
+                        "TIPO_VENCIMENTO_PARCELAS": tipo_vencimento_parcelas,
+                        "DIA_INICIO_PERIODO_VENCIMENTO": dia_inicio_periodo_vencimento,
+                        "DIAS_PARA_VENC_PRIMEIRA_PARC": dias_para_venc_primeira_parc,
+                        "QTD_PARCELAS_DIA_FIXO_VENC": qtd_parcelas_dia_fixo_venc,
+                        "CREDENCIADORA_CNPJ": credenciadora_cnpj,
+                        "UTILIZAR_EM_VENDAS_WEB": params.utilizar_em_vendas_web,
+                        "FORMA_CALC_DIF_CARTAO_PARC": params.forma_calc_dif_cartao_parc,
+                        "PERM_VINCULAR_CRT_AUT_CAIXA": params.perm_vincular_crt_aut_caixa,
+                        "BANDEIRA_CARTAO": cls.bandeira_cod(str(entry["bandeira"])),
+                        "TIPO_PARCELAMENTO": params.tipo_parcelamento,
+                        "TIPO_COBRANCA_RETENCAO": params.tipo_cobranca_retencao,
+                        "TIPO_RETENCAO_CARTAO": tipo_retencao_cartao,
+                        "VENCIMENTO_PARC_PROX_DIA_UTIL": params.vencimento_parc_prox_dia_util,
+                        "RECEBIMENTO_UNICO_PAG_SEGURO": params.recebimento_unico_pag_seguro,
+                        "APENAS_DIAS_UTEIS_CALCULO_PRAZO": params.apenas_dias_uteis_calculo_prazo,
+                        "TIPO_INICIO_PERIODO_VENCIMENTO": tipo_inicio_periodo_vencimento,
+                        "TIPO_VENCIMENTO_PRIMEIRA_PARC": tipo_vencimento_primeira_parc,
                     })
 
+                    for parcela in range(1, parcelas + 1):
+                        prazos_rows.append({
+                            "CHAVE_IMPORTACAO": chave,
+                            "DIAS": dias_base * parcela,
+                        })
+
+                chave = cartoes_criados[cartao_key]
+
                 for empresa_id in entry["empresas"]:
+                    empresa_id = int(empresa_id)
+                    retencao_key = (cartao_key, empresa_id)
+                    taxa = entry["taxa"]
+                    if retencao_key in taxas_por_empresa:
+                        if taxas_por_empresa[retencao_key] != taxa:
+                            raise ValidationError(
+                                f"Taxas conflitantes para o cartão '{chave}', "
+                                f"empresa {empresa_id}: "
+                                f"{taxas_por_empresa[retencao_key]} e {taxa}. "
+                                f"Verifique a linha {entry['source_row']} da planilha."
+                            )
+                        continue
+                    taxas_por_empresa[retencao_key] = taxa
                     retencoes_rows.append({
                         "CHAVE_IMPORTACAO": chave,
-                        "EMPRESA_ID": int(empresa_id),
+                        "EMPRESA_ID": empresa_id,
                         "TAXA_COBRANCA": entry["taxa"],
                         "EMPRESA_USA_CARTAO": "S",
                     })
