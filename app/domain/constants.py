@@ -2,7 +2,7 @@ from pathlib import Path
 
 APP_NAME = "Layout Importa Cartão"
 APP_SUBTITLE = "Gerador local de arquivos CSV para importação de cartões"
-APP_VERSION = "2.0.0"
+APP_VERSION = "2.1.0"
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 ASSETS_DIR = BASE_DIR / "assets"
